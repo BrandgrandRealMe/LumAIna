@@ -72,6 +72,33 @@ const keyNameMap = require("./keyNameMap.js")
   }
 });
 
+// Animation 
+
+let x = 100; // Initial x position
+let y = 50; // Initial y position
+let dx = 1; // Horizontal speed
+let dy = .5; // Vertical speed
+
+setInterval(() => {
+  // Mouse handler
+  // Bounce off the edges:
+  if (x + 1 > 100 || x < 0) {
+    dx = -dx;
+  }
+  if (y + 1 > 100 || y < 0) {
+    dy = -dy;
+  }
+
+  // Update the position with the current speed:
+  x += dx;
+  y += dy;
+
+  const mousePosition = {
+    x: x,
+    y: y,
+  };
+  cl.sendArray([{ m: "m", ...mousePosition }]);
+}, 100);
 
 // Message handler
 cl.on("a", async (msg) => {
