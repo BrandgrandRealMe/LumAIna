@@ -1,4 +1,11 @@
-/notes
+logs/
+replit.nix
+.replit
+.prettierignore
+.breakpoints
+result
+.env
+node_modules
 .config 
 package-lock.json
 logs
