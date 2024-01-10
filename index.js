@@ -105,7 +105,7 @@ cl.on("a", async (msg) => {
   const id = msg.p._id;
   if (id == config.botid) return;
   if (!msg || !msg.a) return;
-  client.channels.get("01HKQGAFGNNDSPTWDW2MPA8X5X").sendMessage({
+  client.channels.get(config.bridgeid).sendMessage({
     content: msg.a,
     masquerade: {
       name: truncate(msg.p.name, 32, false),
@@ -139,10 +139,10 @@ cl.on("a", async (msg) => {
 
 client.on("messageCreate", async (message) => {
   if (!message || !message.content) return;
-  let bridgechannel = "01HKQGAFGNNDSPTWDW2MPA8X5X";
+  let bridgechannel = config.bridgeid;
   if (message.channel.id != bridgechannel) return;
   let authorId = message.author.id;
-  if (authorId == "01HKQGEJZ2VE62MZ7W6FXR87NX") return;
+  if (authorId == config.rbotid) return;
   const user =
     client.users.get(authorId) || (await client.usets.fetch(authorId));
   const msg = message.content.replace(/\n+/g, " ").trim(512);
