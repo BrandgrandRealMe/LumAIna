@@ -50,7 +50,7 @@ function sendmsg(msg, rplto) {
       message: msg.replace(/\n+/g, " ").trim(512),
     },
   ]);
-  client.channels.get("01HKQGAFGNNDSPTWDW2MPA8X5X").sendMessage({
+  client.channels.get(config.bridgeid).sendMessage({
     content: msg,
     masquerade: {
       name: truncate(config.name, 32, false),
