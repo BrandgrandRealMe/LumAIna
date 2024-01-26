@@ -11,4 +11,5 @@ package-lock.json
 logs
 temp.png
 temp.mid
+database
 config.json

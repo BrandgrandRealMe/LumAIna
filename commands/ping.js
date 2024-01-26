@@ -1,3 +1,12 @@
-  module.exports = (cl, args, msg, sendmsg) => {
-        sendmsg("pong!")
-}
+module.exports = {
+  info: {
+    name: "ping",
+    desc: "Check if the bot is working!",
+    usage: "",
+    type: "debug",
+    mode: "GLOBAL",
+  },
+  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+    sendmsg("pong!");
+  },
+};

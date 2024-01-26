@@ -12,15 +12,27 @@ function truncate(str, n, useWordBoundary) {
       : subString) + "…"
   );
 }
-
-module.exports = (cl, args, msg, sendmsg, hercai) => {
-  hercai
-  .question({ content: "Your name is LumAIna, Reply in under 512 characters: " + args.join(" ") })
-  .then((response) => {
-    sendmsg(truncate(filter.sanitize(response.reply), 512, true));
-  })
-  .catch((err) => {
-    console.error("Error:", err);
-  });
-  
+module.exports = {
+  info: {
+    name: "ai",
+    desc: "Ask AI something!",
+    usage: "<prompt>",
+    type: "fun",
+    mode: "GLOBAL",
+  },
+  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+    if (args.length == 0) return sendmsg(`Usage: \`ai <prompt>\``);
+    hercai
+      .question({
+        content:
+          "Your name is LumAIna, Reply in under 512 characters: " +
+          args.join(" "),
+      })
+      .then((response) => {
+        sendmsg(truncate(filter.sanitize(response.reply), 512, true));
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+      });
+  },
 };

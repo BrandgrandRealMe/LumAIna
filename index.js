@@ -4,7 +4,6 @@ const MPP = require("mpp-client-net");
 const bl = require("betterdevlogs");
 const { Client } = require("revolt.js");
 
-
 // For Commands
 const { Hercai } = require("hercai");
 const { SwearShield } = require("swear-shield");
@@ -13,11 +12,13 @@ const axios = require("axios");
 const imgbbUploader = require("imgbb-uploader");
 const fs = require("fs");
 const MidiPlayer = require("midi-player-js");
-
+const randomIPGenerator = require("random-ip-generator");
 
 const log = bl({ logfolder: "logs" }); // Better Logs By Me (BrandgrandReal)
 
 const config = require("./config.json");
+const blacklist = require("./blacklist.json");
+
 log.debug(
   `Loaded Config | Prefix - ${config.prefix}, Name: ${config.name}, Room: ${config.room}, Color: ${config.color}, Owner: ${config.owner}, BotID: ${config.botid}`
 );
@@ -25,6 +26,9 @@ log.debug(
 const cl = new MPP("wss://mppclone.com:8443", process.env.TOKEN);
 const client = new Client();
 const hercai = new Hercai();
+
+const Sagdb = require("sagdb").default;
+const db = new Sagdb({ name: "bio's", minify: false });
 
 const commandsfolder = "./commands";
 const commands = fs
@@ -58,8 +62,8 @@ function sendmsg(msg, rplto) {
     },
   });
 }
-const keyNameMap = require("./keyNameMap.js")
- const Player = new MidiPlayer.Player(async function (event) {
+const keyNameMap = require("./keyNameMap.js");
+const Player = new MidiPlayer.Player(async function (event) {
   if (
     event.name == "Note off" ||
     (event.name == "Note on" && event.velocity === 0)
@@ -72,12 +76,12 @@ const keyNameMap = require("./keyNameMap.js")
   }
 });
 
-// Animation 
+// Animation
 
 let x = 100; // Initial x position
 let y = 50; // Initial y position
 let dx = 1; // Horizontal speed
-let dy = .5; // Vertical speed
+let dy = 0.5; // Vertical speed
 
 setInterval(() => {
   // Mouse handler
@@ -115,22 +119,45 @@ cl.on("a", async (msg) => {
   if (!msg.a.startsWith(config.prefix)) return;
   const args = msg.a.slice(config.prefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
-
   if (commandName === "help") {
+    let commandList = "";
     const commandFiles = fs
       .readdirSync(commandsfolder)
       .filter((file) => file.endsWith(".js"));
-    const commandList = commandFiles
-      .map((file) => file.replace(".js", ""))
-      .join(", ");
-    sendmsg(`Commands: ${commandList}`);
-    return;
+    if (!args[0]) {
+      for (const file of commandFiles) {
+        const command = require(`./commands/${file}`);
+        const cmdName = command.info.name;
+        const cmdDesc = command.info.desc;
+        const cmdType = command.info.type;
+        const cmdMode = command.info.mode;
+        const cmdUsage = command.info.usage; // For the FUTURE
+        const message = ` [\`${cmdName}\` - ${cmdDesc} | ${cmdType} | ${cmdMode}] `; // `help` - Gives you this message. | Info | GLOBAL
+        commandList += message;
+      }
+      sendmsg(`CMDs: ${commandList}`);
+      return;
+    } else if (args[0]) {
+      const cmd = args[0].toLowerCase();
+      const command = commands.find((file) => file.split(".")[0] === cmd);
+      if (!command) return console.log("command not found");
+      try {
+        const commandFile = require(`./commands/${command}`);
+        const commandInfo = commandFile.info;
+        const message = `\`${config.prefix}${commandInfo.name} ${commandInfo.usage}\` - ${commandInfo.desc} | ${commandInfo.type} | ${commandInfo.mode}`;
+        sendmsg(message);
+      } catch (e) {
+        log.error(`Error while loading command ${commandName}.js`);
+        console.log(e);
+      }
+      return;
+    }
   }
   const command = commands.find((file) => file.split(".")[0] === commandName);
   if (!command) return;
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile(cl, args, msg, sendmsg, hercai, Player);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -153,11 +180,59 @@ client.on("messageCreate", async (message) => {
     },
   ]);
   if (!message.content.startsWith(config.prefix)) return;
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  if (commandName === "help") {
+    let commandList = "";
+    const commandFiles = fs
+      .readdirSync(commandsfolder)
+      .filter((file) => file.endsWith(".js"));
+    if (!args[0]) {
+      for (const file of commandFiles) {
+        const command = require(`./commands/${file}`);
+        const cmdName = command.info.name;
+        const cmdDesc = command.info.desc;
+        const cmdType = command.info.type;
+        const cmdMode = command.info.mode;
+        const cmdUsage = command.info.usage; // For the FUTURE
+        const message = ` [\`${cmdName}\` - ${cmdDesc} | ${cmdType} | ${cmdMode}] `; // `help` - Gives you this message. | Info | GLOBAL
+        commandList += message;
+      }
+      sendmsg(`CMDs: ${commandList}`);
+      return;
+    } else if (args[0]) {
+      const cmd = args[0].toLowerCase();
+      const command = commands.find((file) => file.split(".")[0] === cmd);
+      if (!command) return console.log("command not found");
+      try {
+        const commandFile = require(`./commands/${command}`);
+        const commandInfo = commandFile.info;
+        const message = `\`${config.prefix}${commandInfo.name} ${commandInfo.usage}\` - ${commandInfo.desc} | ${commandInfo.type} | ${commandInfo.mode}`;
+        sendmsg(message);
+      } catch (e) {
+        log.error(`Error while loading command ${commandName}.js`);
+        console.log(e);
+      }
+      return;
+    }
+  }
+  const command = commands.find((file) => file.split(".")[0] === commandName);
+  if (!command) return;
+  try {
+    const commandFile = require(`./commands/${command}`);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db);
+  } catch (e) {
+    log.error(`Error while loading command ${commandName}.js`);
+    console.log(e);
+  }
 });
 
-client.on("ready", async () =>
-  log.server(`REVOLT: Logged in as ${client.user.username}!`)
-);
+client.on("ready", async () => {
+  log.server(`REVOLT: Logged in as ${client.user.username}!`);
+  cl.start();
+  cl.setChannel(config.room);
+});
 
 // On join
 cl.on("hi", () => {
@@ -170,10 +245,45 @@ cl.on("hi", () => {
   log.server(`MPP: Logged in as ${config.name}`);
 });
 
-// start MPP & Revolt client & set room
+// REVOLT: update Status
+async function updateStatus(users, room) {
+  client.user.edit({
+    status: {
+      text: `In room ${room} with ${users} players!`,
+      presence: "Focus",
+    },
+  });
+}
+
+// Room Join and Leave and updates
+cl.on("p", async (data) => {
+  if (data.name == config.name) return;
+  if (data._id == config.botid) return;
+  if (blacklist.WAL.includes(data._id)) return;
+
+  client.channels.get(config.bridgeid).sendMessage({
+    content: `Member joined room: \`${data._id}\` | \`${data.name}\``,
+  });
+});
+
+cl.on("bye", async (data) => {
+  if (data.name == config.name) return;
+  if (data.p == config.botid) return;
+  if (blacklist.WAL.includes(data.p)) return;
+
+  client.channels.get(config.bridgeid).sendMessage({
+    content: `Member left room: \`${data.p}\``,
+  });
+});
+
+cl.on("ch", async (data) => {
+  const users = data.ch.count;
+  const room = data.ch._id || data.ch.id;
+  updateStatus(users, room);
+});
+
+// Revolt client login
 client.loginBot(process.env.RTOKEN);
-cl.start();
-cl.setChannel(config.room);
 
 // To keep bot running :)
 process.on("uncaughtException", function (error) {

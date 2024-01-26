@@ -7,8 +7,16 @@ async function fetchJoke() {
   const data = response.json();
   return data;
 }
-
-module.exports = async (cl, args, msg, sendmsg) => {
-  const { joke } = await fetchJoke();
-  sendmsg(`Dad: ${joke}`);
+module.exports = {
+  info: {
+    name: "dadjoke",
+    desc: "Get a random dadjoke!",
+    usage: "",
+    type: "fun",
+    mode: "GLOBAL",
+  },
+  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+    const { joke } = await fetchJoke();
+    sendmsg(`Dad: ${joke}`);
+  },
 };
