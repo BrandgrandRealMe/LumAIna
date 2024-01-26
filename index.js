@@ -3,16 +3,9 @@ require("dotenv").config();
 const MPP = require("mpp-client-net");
 const bl = require("betterdevlogs");
 const { Client } = require("revolt.js");
-
-// For Commands
 const { Hercai } = require("hercai");
-const { SwearShield } = require("swear-shield");
-const filter = new SwearShield();
-const axios = require("axios");
-const imgbbUploader = require("imgbb-uploader");
 const fs = require("fs");
 const MidiPlayer = require("midi-player-js");
-const randomIPGenerator = require("random-ip-generator");
 
 const log = bl({ logfolder: "logs" }); // Better Logs By Me (BrandgrandReal)
 
@@ -117,6 +110,7 @@ cl.on("a", async (msg) => {
     },
   });
   if (!msg.a.startsWith(config.prefix)) return;
+  if (blacklist.GLOBAL.includes(msg.p._id)) return sendmsg("You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!");
   const args = msg.a.slice(config.prefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
   if (commandName === "help") {
@@ -180,6 +174,7 @@ client.on("messageCreate", async (message) => {
     },
   ]);
   if (!message.content.startsWith(config.prefix)) return;
+  if (blacklist.GLOBAL.includes(authorId)) return sendmsg("You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!");
   const args = message.content.slice(config.prefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
 
@@ -221,7 +216,7 @@ client.on("messageCreate", async (message) => {
   if (!command) return;
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db);
+    commandFile.run(cl, args, message, sendmsg, hercai, Player, db);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);

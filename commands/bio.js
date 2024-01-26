@@ -3,7 +3,7 @@ module.exports = {
     name: "bio",
     desc: "Get someones bio",
     usage: "set <text> | get <userID>",
-    type: "info",
+    type: "util",
     mode: "MPP",
   },
   run: async function (cl, args, msg, sendmsg, hercai, Player, db) {

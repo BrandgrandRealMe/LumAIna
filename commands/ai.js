@@ -1,5 +1,6 @@
 const { SwearShield } = require("swear-shield");
 const filter = new SwearShield();
+const blacklist = require("../blacklist.json");
 
 function truncate(str, n, useWordBoundary) {
   if (str.length <= n) {
@@ -21,6 +22,16 @@ module.exports = {
     mode: "GLOBAL",
   },
   run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+    let id = "";
+    if (msg.p) {
+      id = msg.p._id;
+    } else {
+      id = msg.author.id;
+    }
+    if (blacklist.AI.includes(id))
+      return sendmsg(
+        "You can not use AI commands! You are blacklisted! Contact BrandgrandReal for any questions!"
+      );
     if (args.length == 0) return sendmsg(`Usage: \`ai <prompt>\``);
     hercai
       .question({

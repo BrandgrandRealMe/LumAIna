@@ -3,7 +3,7 @@ module.exports = {
     name: "roominfo",
     desc: "Get info for the room.",
     usage: "",
-    type: "info",
+    type: "util",
     mode: "GLOBAL",
   },
   run: async function (cl, args, msg, sendmsg, hercai, Player, db) {

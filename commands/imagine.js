@@ -3,6 +3,7 @@ const axios = require("axios");
 const imgbbUploader = require("imgbb-uploader");
 const imgbbTOKEN = process.env.imgbbTOKEN;
 const mtempy = require("mtempy");
+const blacklist = require("../blacklist.json");
 
 async function downloadImage(url, path) {
   const response = await axios({
@@ -41,6 +42,16 @@ module.exports = {
     mode: "GLOBAL",
   },
   run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+    let id = "";
+    if (msg.p) {
+      id = msg.p._id;
+    } else {
+      id = msg.author.id;
+    }
+    if (blacklist.AI.includes(id))
+      return sendmsg(
+        "You can not use AI commands! You are blacklisted! Contact BrandgrandReal for any questions!"
+      );
     if (args.length == 0) return sendmsg(`Usage: \`imagine <prompt>\``);
     hercai.drawImage({ prompt: args.join(" ") }).then(async (response) => {
       const tempUrl = response.url;
