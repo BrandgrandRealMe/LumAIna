@@ -1,5 +1,6 @@
 const fs = require("fs");
 const https = require("https");
+const urlutils = require("../urlutils.js");
 
 module.exports = {
   info: {
@@ -17,6 +18,7 @@ module.exports = {
       return sendmsg("You do not have perms to use this command!");
 
     const URL = args[0];
+    if (!urlutils.isValidURL(URL)) return sendmsg("Invalid URL.");
     const regex = /\.mid$|\.kar$|\.rmi$/i;
     const isMidi = regex.test(URL);
     if (!isMidi) return sendmsg("This is not a midi file!");

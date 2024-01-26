@@ -1,7 +1,7 @@
 module.exports = {
   info: {
-    name: "about",
-    desc: "Get a link to the Github.",
+    name: "source",
+    desc: "Get my source code.",
     usage: "",
     type: "info",
     mode: "GLOBAL",

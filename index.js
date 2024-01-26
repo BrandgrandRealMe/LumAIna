@@ -151,7 +151,7 @@ cl.on("a", async (msg) => {
   if (!command) return;
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db, log);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -216,7 +216,7 @@ client.on("messageCreate", async (message) => {
   if (!command) return;
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, message, sendmsg, hercai, Player, db);
+    commandFile.run(cl, args, message, sendmsg, hercai, Player, db, log);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
