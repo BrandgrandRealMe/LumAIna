@@ -40,6 +40,19 @@ function truncate(str, n, useWordBoundary) {
       : subString) + "…"
   );
 }
+function calcMatch(word, base, insensitive = true) {
+  insensitive = insensitive ? "i" : "";
+  let matching = 0;
+  let used = [];
+  word.split("").forEach((c) => {
+    if (used.includes(c)) return;
+    let m = base.match(new RegExp(c, "g" + insensitive));
+    used.push(c);
+    if (m === null) return;
+    matching += m.length;
+  });
+  return matching / base.length;
+}
 
 function sendmsg(msg, rplto) {
   cl.sendArray([
@@ -111,7 +124,10 @@ cl.on("a", async (msg) => {
     },
   });
   if (!msg.a.startsWith(config.prefix)) return;
-  if (blacklist.GLOBAL.includes(msg.p._id)) return sendmsg("You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!");
+  if (blacklist.GLOBAL.includes(msg.p._id))
+    return sendmsg(
+      "You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!"
+    );
   const args = msg.a.slice(config.prefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
   if (commandName === "help") {
@@ -149,7 +165,26 @@ cl.on("a", async (msg) => {
     }
   }
   const command = commands.find((file) => file.split(".")[0] === commandName);
-  if (!command) return;
+  if (!command) {
+    const commandFiles = fs
+      .readdirSync(commandsfolder)
+      .filter((file) => file.endsWith(".js"));
+    const matches = commandFiles
+      .filter((c) => c.length > 1)
+      .map((c) => {
+        return {
+          score: calcMatch(commandName, c.replace(".js", "")),
+          command: c.replace(".js", ""),
+        };
+      });
+    matches.sort((a, b) => b.score - a.score);
+    if (matches[0].score < this.minMatchScore) return; // unknown command, not similar to existing one
+    const command = matches[0];
+    sendmsg(
+      `Unknown command. Did you mean \`${config.prefix}${command.command}\`?`
+    );
+    return;
+  }
   try {
     const commandFile = require(`./commands/${command}`);
     commandFile.run(cl, args, msg, sendmsg, hercai, Player, db, log);
@@ -175,7 +210,10 @@ client.on("messageCreate", async (message) => {
     },
   ]);
   if (!message.content.startsWith(config.prefix)) return;
-  if (blacklist.GLOBAL.includes(authorId)) return sendmsg("You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!");
+  if (blacklist.GLOBAL.includes(authorId))
+    return sendmsg(
+      "You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!"
+    );
   const args = message.content.slice(config.prefix.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
 
@@ -214,7 +252,26 @@ client.on("messageCreate", async (message) => {
     }
   }
   const command = commands.find((file) => file.split(".")[0] === commandName);
-  if (!command) return;
+  if (!command) {
+    const commandFiles = fs
+      .readdirSync(commandsfolder)
+      .filter((file) => file.endsWith(".js"));
+    const matches = commandFiles
+      .filter((c) => c.length > 1)
+      .map((c) => {
+        return {
+          score: calcMatch(commandName, c.replace(".js", "")),
+          command: c.replace(".js", ""),
+        };
+      });
+    matches.sort((a, b) => b.score - a.score);
+    if (matches[0].score < this.minMatchScore) return; // unknown command, not similar to existing one
+    const command = matches[0];
+    sendmsg(
+      `Unknown command. Did you mean \`${config.prefix}${command.command}\`?`
+    );
+    return;
+  }
   try {
     const commandFile = require(`./commands/${command}`);
     commandFile.run(cl, args, message, sendmsg, hercai, Player, db, log);
@@ -267,7 +324,7 @@ cl.on("bye", async (data) => {
   if (data.p == config.botid) return;
   if (blacklist.WAL.includes(data.p)) return;
   const name = namesdb.get(data.p) || "Unknown Name";
-  
+
   client.channels.get(config.bridgeid).sendMessage({
     content: `Member left room: \`${data.p}\` | \`${name}\``,
   });
@@ -279,11 +336,9 @@ cl.on("ch", async (data) => {
   updateStatus(users, room);
 
   const usersArray = data.ppl;
-  usersArray.forEach(user => {
+  usersArray.forEach((user) => {
     namesdb.set(user._id, user.name);
   });
-
-
 });
 
 // Revolt client login
