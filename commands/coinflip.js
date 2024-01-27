@@ -6,7 +6,7 @@ module.exports = {
     type: "fun",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     let items = ["Heads", "Tails"];
     let random = items[Math.floor(Math.random() * items.length)];
     sendmsg(`You got ${random}!`);

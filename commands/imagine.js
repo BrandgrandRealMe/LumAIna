@@ -41,7 +41,7 @@ module.exports = {
     type: "fun",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     let id = "";
     if (msg.p) {
       id = msg.p._id;

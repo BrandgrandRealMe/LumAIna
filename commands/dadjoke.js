@@ -15,7 +15,7 @@ module.exports = {
     type: "fun",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     const { joke } = await fetchJoke();
     sendmsg(`Dad: ${joke}`);
   },

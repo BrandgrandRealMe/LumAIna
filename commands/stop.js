@@ -6,7 +6,7 @@ module.exports = {
     type: "owner",
     mode: "MPP",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     if (!msg) return sendmsg(`That is a MPP only command.`); // run Only in MPP
     const oid = "5866b0893c3480ff7289be46";
     const uid = msg.p._id;

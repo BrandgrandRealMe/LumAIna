@@ -6,7 +6,7 @@ module.exports = {
     type: "util",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     const players = Object.keys(cl.ppl).length;
     const cname = cl.channel.id;
     const color = {

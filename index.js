@@ -21,7 +21,7 @@ const client = new Client();
 const hercai = new Hercai();
 
 const Sagdb = require("sagdb").default;
-const db = new Sagdb({ name: "bio's", minify: false });
+const biosdb = new Sagdb({ name: "bio's", minify: false });
 const namesdb = new Sagdb({ name: "namesdb", minify: false });
 
 const commandsfolder = "./commands";
@@ -187,7 +187,7 @@ cl.on("a", async (msg) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, db, log);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -274,7 +274,7 @@ client.on("messageCreate", async (message) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, message, sendmsg, hercai, Player, db, log);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);

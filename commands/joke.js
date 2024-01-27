@@ -7,7 +7,7 @@ module.exports = {
     type: "fun",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     var getRandomJoke = oneLinerJoke.getRandomJoke();
     var joke = getRandomJoke.body;
     sendmsg(joke);

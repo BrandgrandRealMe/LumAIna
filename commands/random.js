@@ -9,7 +9,7 @@ module.exports = {
     type: "fun",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     const sub = args[0] || null;
     const sub2 = args[1] || null;
     if (sub) {

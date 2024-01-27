@@ -18,7 +18,7 @@ module.exports = {
     type: "util",
     mode: "MPP",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     if (!msg) return sendmsg(`That is a MPP only command.`);
     if (args.length == 0)
       return sendmsg(

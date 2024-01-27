@@ -6,7 +6,7 @@ module.exports = {
     type: "info",
     mode: "GLOBAL",
   },
-  run: async function (cl, args, msg, sendmsg, hercai, Player, db) {
+  run: async function (cl, args, msg, sendmsg, hercai, Player, biosdb, log) {
     sendmsg(
       "The source code is available on Github: https://github.com/BrandgrandRealMe/LumAIna"
     );
