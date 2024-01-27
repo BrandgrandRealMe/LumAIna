@@ -279,7 +279,6 @@ cl.on("ch", async (data) => {
   updateStatus(users, room);
 
   const usersArray = data.ppl;
-  console.log(usersArray);
   usersArray.forEach(user => {
     namesdb.set(user._id, user.name);
   });
