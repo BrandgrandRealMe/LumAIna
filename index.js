@@ -23,6 +23,7 @@ const hercai = new Hercai();
 const Sagdb = require("sagdb").default;
 const biosdb = new Sagdb({ name: "bio's", minify: false });
 const namesdb = new Sagdb({ name: "namesdb", minify: false });
+const blacklistdb = new Sagdb({ name: "blacklistdb", minify: false });
 
 const commandsfolder = "./commands";
 const commands = fs
@@ -124,7 +125,8 @@ cl.on("a", async (msg) => {
     },
   });
   if (!msg.a.startsWith(config.prefix)) return;
-  if (blacklist.GLOBAL.includes(msg.p._id))
+  const blacklist = blacklistdb.get(msg.p._id);
+  if (blacklist === "global")
     return sendmsg(
       "You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!"
     );
@@ -187,7 +189,7 @@ cl.on("a", async (msg) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log, blacklistdb);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -210,7 +212,8 @@ client.on("messageCreate", async (message) => {
     },
   ]);
   if (!message.content.startsWith(config.prefix)) return;
-  if (blacklist.GLOBAL.includes(authorId))
+  const blacklist = blacklistdb.get(authorId);
+  if (blacklist === "global")
     return sendmsg(
       "You can not use this bots commands! You are blacklisted! Contact BrandgrandReal for any questions!"
     );
@@ -274,7 +277,7 @@ client.on("messageCreate", async (message) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log);
+    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log, blacklistdb);
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
