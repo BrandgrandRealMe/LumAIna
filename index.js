@@ -22,6 +22,7 @@ const hercai = new Hercai();
 
 const Sagdb = require("sagdb").default;
 const db = new Sagdb({ name: "bio's", minify: false });
+const namesdb = new Sagdb({ name: "namesdb", minify: false });
 
 const commandsfolder = "./commands";
 const commands = fs
@@ -255,6 +256,7 @@ cl.on("p", async (data) => {
   if (data.name == config.name) return;
   if (data._id == config.botid) return;
   if (blacklist.WAL.includes(data._id)) return;
+  namesdb.set(data._id, data.name);
 
   client.channels.get(config.bridgeid).sendMessage({
     content: `Member joined room: \`${data._id}\` | \`${data.name}\``,
@@ -262,12 +264,12 @@ cl.on("p", async (data) => {
 });
 
 cl.on("bye", async (data) => {
-  if (data.name == config.name) return;
   if (data.p == config.botid) return;
   if (blacklist.WAL.includes(data.p)) return;
-
+  const name = namesdb.get(data.p) || "Unknown Name";
+  
   client.channels.get(config.bridgeid).sendMessage({
-    content: `Member left room: \`${data.p}\``,
+    content: `Member left room: \`${data.p}\` | \`${name}\``,
   });
 });
 
@@ -275,6 +277,14 @@ cl.on("ch", async (data) => {
   const users = data.ch.count;
   const room = data.ch._id || data.ch.id;
   updateStatus(users, room);
+
+  const usersArray = data.ppl;
+  console.log(usersArray);
+  usersArray.forEach(user => {
+    namesdb.set(user._id, user.name);
+  });
+
+
 });
 
 // Revolt client login

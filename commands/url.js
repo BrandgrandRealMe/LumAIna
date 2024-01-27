@@ -3,12 +3,12 @@ module.exports = {
   info: {
     name: "url",
     desc: "Do things with a URL.",
-    usage: "shorten <url>",
+    usage: "shorten <url> | expand <url>",
     type: "util",
     mode: "GLOBAL",
   },
   run: async function (cl, args, msg, sendmsg, hercai, Player, db, log) {
-    if (!args[0]) return sendmsg("Usage: shorten <url>");
+    if (!args[0]) return sendmsg("Usage: `shorten <url> | expand <url>`");
     if (args[0] == "shorten") {
       const longurl = args[1];
       if (!urlutils.isValidURL(longurl)) return sendmsg("Invalid URL.");
