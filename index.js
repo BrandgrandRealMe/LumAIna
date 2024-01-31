@@ -312,17 +312,19 @@ async function updateStatus(users, room) {
 }
 
 // Room Join and Leave and updates
-cl.on("p", async (data) => {
-  if (data.name == config.name) return;
-  if (data._id == config.botid) return;
-  if (blacklist.WAL.includes(data._id)) return;
-  namesdb.set(data._id, data.name);
+  cl.on("participant added", p => {
+  if (p.name == config.name) return;
+  if (p._id == config.botid) return;
+  if (blacklist.WAL.includes(p._id)) return;
+  namesdb.set(p._id, p.name);
 
   client.channels.get(config.bridgeid).sendMessage({
-    content: `Member joined room: \`${data._id}\` | \`${data.name}\``,
+    content: `Member joined room: \`${p._id}\` | \`${p.name}\``,
   });
 });
-
+cl.on("p", async (data) => { 
+  namesdb.set(data._id, data.name);
+});
 cl.on("bye", async (data) => {
   if (data.p == config.botid) return;
   if (blacklist.WAL.includes(data.p)) return;
