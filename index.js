@@ -6,6 +6,8 @@ const { Client } = require("revolt.js");
 const { Hercai } = require("hercai");
 const fs = require("fs");
 const MidiPlayer = require("midi-player-js");
+const lodash = require('lodash');
+
 
 const log = bl({ logfolder: "logs" }); // Better Logs By Me (BrandgrandReal)
 
@@ -302,7 +304,7 @@ cl.on("hi", () => {
 });
 
 // REVOLT: update Status
-async function updateStatus(users, room) {
+async function FupdateStatus(users, room) {
   client.user.edit({
     status: {
       text: `In room ${room} with ${users} players!`,
@@ -310,6 +312,7 @@ async function updateStatus(users, room) {
     },
   });
 }
+let updateStatus = lodash.debounce(FupdateStatus, 1000);
 
 // Room Join and Leave and updates
   cl.on("participant added", p => {
