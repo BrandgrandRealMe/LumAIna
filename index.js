@@ -303,8 +303,16 @@ cl.on("hi", () => {
       set: { name: config.name, color: config.color },
     },
   ]);
+  const roominfo = cl.channel;
+  const roomID = config.room;
+  if (roominfo) roomID = roominfo.id || config.room;
+  
+  const roomUrl = `https://multiplayerpiano.net/?c=${encodeURIComponent(roomID)}`;
+  
+  
+  console.log(roominfo);
   client.channels.get(config.bridgeid).sendMessage({
-    content: `Logged in as ${config.name} on MPP`,
+    content: `Logged in as \`${config.name}\` in [${roomID}](${roomUrl})`,
   });
   log.server(`MPP: Logged in as ${config.name}`);
 });
@@ -321,17 +329,14 @@ async function FupdateStatus(users, room) {
 let updateStatus = lodash.debounce(FupdateStatus, 9000);
 
 // Room Join and Leave and updates
-  cl.on("participant added", p => {
+cl.on("p", async (p) => {  // Catch join and player updates
   if (p._id == config.botid) return;
   if (blacklist.WAL.includes(p._id)) return;
   namesdb.set(p._id, p.name);
 
   client.channels.get(config.bridgeid).sendMessage({
-    content: `Member joined room: \`${p._id}\` | \`${p.name}\``,
+    content: `Player Joined or updated: \`${p._id}\` | \`${p.name}\``,
   });
-});
-cl.on("p", async (data) => {  // Catch join and player updates
-  namesdb.set(data._id, data.name);
 });
 cl.on("bye", async (data) => {
   if (data.p == config.botid) return;
