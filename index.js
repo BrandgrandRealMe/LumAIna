@@ -288,6 +288,9 @@ client.on("messageCreate", async (message) => {
 
 client.on("ready", async () => {
   log.server(`REVOLT: Logged in as ${client.user.username}!`);
+  client.channels.get(config.bridgeid).sendMessage({
+    content: `I am ONLINE`,
+  });
   cl.start();
   cl.setChannel(config.room);
 });
@@ -300,6 +303,9 @@ cl.on("hi", () => {
       set: { name: config.name, color: config.color },
     },
   ]);
+  client.channels.get(config.bridgeid).sendMessage({
+    content: `Logged in as ${config.name} on MPP`,
+  });
   log.server(`MPP: Logged in as ${config.name}`);
 });
 
@@ -312,11 +318,10 @@ async function FupdateStatus(users, room) {
     },
   });
 }
-let updateStatus = lodash.debounce(FupdateStatus, 1000);
+let updateStatus = lodash.debounce(FupdateStatus, 9000);
 
 // Room Join and Leave and updates
   cl.on("participant added", p => {
-  if (p.name == config.name) return;
   if (p._id == config.botid) return;
   if (blacklist.WAL.includes(p._id)) return;
   namesdb.set(p._id, p.name);
@@ -325,7 +330,7 @@ let updateStatus = lodash.debounce(FupdateStatus, 1000);
     content: `Member joined room: \`${p._id}\` | \`${p.name}\``,
   });
 });
-cl.on("p", async (data) => { 
+cl.on("p", async (data) => {  // Catch join and player updates
   namesdb.set(data._id, data.name);
 });
 cl.on("bye", async (data) => {
