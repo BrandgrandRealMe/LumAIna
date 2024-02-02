@@ -13,6 +13,7 @@ const log = bl({ logfolder: "logs" }); // Better Logs By Me (BrandgrandReal)
 
 const config = require("./config.json");
 const blacklist = require("./blacklist.json");
+let channelJoinTime = 0;
 
 log.debug(
   `Loaded Config | Prefix - ${config.prefix}, Name: ${config.name}, Room: ${config.room}, Color: ${config.color}, Owner: ${config.owner}, BotID: ${config.botid}`
@@ -88,9 +89,9 @@ const Player = new MidiPlayer.Player(async function (event) {
 
 // Animation
 
-let x = 100; // Initial x position
-let y = 50; // Initial y position
-let dx = 1; // Horizontal speed
+let x = 50; // Initial x position
+let y = 69; // Initial y position
+let dx = 0.5; // Horizontal speed
 let dy = 0.5; // Vertical speed
 
 setInterval(() => {
@@ -112,7 +113,7 @@ setInterval(() => {
     y: y,
   };
   cl.sendArray([{ m: "m", ...mousePosition }]);
-}, 100);
+}, 50);
 
 // Message handler
 cl.on("a", async (msg) => {
@@ -315,6 +316,7 @@ cl.on("hi", () => {
     content: `Logged in as \`${config.name}\` in [${roomID}](${roomUrl})`,
   });
   log.server(`MPP: Logged in as ${config.name}`);
+  channelJoinTime = Date.now();
 });
 
 // REVOLT: update Status
@@ -329,15 +331,20 @@ async function FupdateStatus(users, room) {
 let updateStatus = lodash.debounce(FupdateStatus, 9000);
 
 // Room Join and Leave and updates
-cl.on("p", async (p) => {  // Catch join and player updates
+cl.on("participant added", p => {
   if (p._id == config.botid) return;
   if (blacklist.WAL.includes(p._id)) return;
   namesdb.set(p._id, p.name);
-
+  if ((Date.now() - channelJoinTime) >= 125) return;
   client.channels.get(config.bridgeid).sendMessage({
-    content: `Player Joined or updated: \`${p._id}\` | \`${p.name}\``,
+    content: `Player Joined: \`${p._id}\` | \`${p.name}\``,
   });
 });
+
+cl.on("p", async (p) => {  // Catch join and player updates
+  namesdb.set(p._id, p.name);
+});
+
 cl.on("bye", async (data) => {
   if (data.p == config.botid) return;
   if (blacklist.WAL.includes(data.p)) return;
