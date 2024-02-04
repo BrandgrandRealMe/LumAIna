@@ -6,8 +6,7 @@ const { Client } = require("revolt.js");
 const { Hercai } = require("hercai");
 const fs = require("fs");
 const MidiPlayer = require("midi-player-js");
-const lodash = require('lodash');
-
+const lodash = require("lodash");
 
 const log = bl({ logfolder: "logs" }); // Better Logs By Me (BrandgrandReal)
 
@@ -22,6 +21,22 @@ log.debug(
 const cl = new MPP("wss://mppclone.com:8443", process.env.TOKEN);
 const client = new Client();
 const hercai = new Hercai();
+
+// bard stuff
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI_KEY = process.env.genAI_KEY;
+const genAI = new GoogleGenerativeAI(genAI_KEY);
+
+async function gemini(prompt) {
+  // For text-only input, use the gemini-pro model
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+  return text;
+  console.log(text);
+}
 
 const Sagdb = require("sagdb").default;
 const biosdb = new Sagdb({ name: "bio's", minify: false });
@@ -127,6 +142,16 @@ cl.on("a", async (msg) => {
       colour: msg.p.color,
     },
   });
+  if (msg.a.startsWith(`@${cl.participantId}`)) {
+    const mention = `@${cl.participantId}`;
+    const args = msg.a.slice(mention.length).trim();
+    if (!args) return;
+    const blacklist = blacklistdb.get(msg.p._id);
+    if (blacklist === "ai") return;
+    console.log("Asking AI");
+    const text = await gemini(args);
+    sendmsg(truncate(text, 512, true));
+  }
   if (!msg.a.startsWith(config.prefix)) return;
   const blacklist = blacklistdb.get(msg.p._id);
   if (blacklist === "global")
@@ -192,7 +217,17 @@ cl.on("a", async (msg) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log, blacklistdb);
+    commandFile.run(
+      cl,
+      args,
+      msg,
+      sendmsg,
+      hercai,
+      Player,
+      biosdb,
+      log,
+      blacklistdb
+    );
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -280,7 +315,17 @@ client.on("messageCreate", async (message) => {
   }
   try {
     const commandFile = require(`./commands/${command}`);
-    commandFile.run(cl, args, msg, sendmsg, hercai, Player, biosdb, log, blacklistdb);
+    commandFile.run(
+      cl,
+      args,
+      msg,
+      sendmsg,
+      hercai,
+      Player,
+      biosdb,
+      log,
+      blacklistdb
+    );
   } catch (e) {
     log.error(`Error while loading command ${commandName}.js`);
     console.log(e);
@@ -307,10 +352,11 @@ cl.on("hi", () => {
   const roominfo = cl.channel;
   const roomID = config.room;
   if (roominfo) roomID = roominfo.id || config.room;
-  
-  const roomUrl = `https://multiplayerpiano.net/?c=${encodeURIComponent(roomID)}`;
-  
-  
+
+  const roomUrl = `https://multiplayerpiano.net/?c=${encodeURIComponent(
+    roomID
+  )}`;
+
   console.log(roominfo);
   client.channels.get(config.bridgeid).sendMessage({
     content: `Logged in as \`${config.name}\` in [${roomID}](${roomUrl})`,
@@ -331,17 +377,18 @@ async function FupdateStatus(users, room) {
 let updateStatus = lodash.debounce(FupdateStatus, 9000);
 
 // Room Join and Leave and updates
-cl.on("participant added", p => {
+cl.on("participant added", (p) => {
   if (p._id == config.botid) return;
   if (blacklist.WAL.includes(p._id)) return;
   namesdb.set(p._id, p.name);
-  if ((Date.now() - channelJoinTime) >= 125) return;
+  if (Date.now() - channelJoinTime >= 125) return;
   client.channels.get(config.bridgeid).sendMessage({
     content: `Player Joined: \`${p._id}\` | \`${p.name}\``,
   });
 });
 
-cl.on("p", async (p) => {  // Catch join and player updates
+cl.on("p", async (p) => {
+  // Catch join and player updates
   namesdb.set(p._id, p.name);
 });
 
