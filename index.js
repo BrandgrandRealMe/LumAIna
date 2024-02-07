@@ -381,7 +381,7 @@ cl.on("participant added", (p) => {
   if (p._id == config.botid) return;
   if (blacklist.WAL.includes(p._id)) return;
   namesdb.set(p._id, p.name);
-  if (Date.now() - channelJoinTime >= 125) return;
+  if (Date.now() - channelJoinTime > 125) return;
   client.channels.get(config.bridgeid).sendMessage({
     content: `Player Joined: \`${p._id}\` | \`${p.name}\``,
   });
