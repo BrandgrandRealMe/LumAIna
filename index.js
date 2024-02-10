@@ -32,10 +32,23 @@ async function gemini(prompt) {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const response = result.response;
   const text = response.text();
   return text;
-  console.log(text);
+}
+const shocktoken = process.env.shocktoken;
+async function shockAI(prompt, uid) {
+  const response = await fetch(
+    `http://api.shockbs.is-a.dev/chat?text=${prompt}&id=${uid}&botname=${config.name}`,
+    {
+      headers: {
+          authorization: "Bearer " + shocktoken,
+      },
+    }
+  );
+  const data = await response.json();
+ if (data.statusCode !== 200) return data.message;
+  return data.message;
 }
 
 const Sagdb = require("sagdb").default;
@@ -48,6 +61,20 @@ const commands = fs
   .readdirSync(commandsfolder)
   .filter((file) => file.endsWith(".js"));
 
+function lettersToNumbers(string) {
+  let newString = "";
+  for (let i = 0; i < string.length; i++) {
+    const currentChar = string[i];
+    const IsNotNumber = isNaN(currentChar);
+    if (IsNotNumber) {
+      const number = parseInt(string[i], 36) - 9;
+      newString += number.toString();
+    } else {
+      newString += currentChar;
+    }
+  }
+  return newString;
+}
 function truncate(str, n, useWordBoundary) {
   if (str.length <= n) {
     return str;
@@ -148,8 +175,9 @@ cl.on("a", async (msg) => {
     if (!args) return;
     const blacklist = blacklistdb.get(msg.p._id);
     if (blacklist === "ai") return;
-    console.log("Asking AI");
-    const text = await gemini(args);
+    const id = msg.p._id;
+    const IDNum = lettersToNumbers(id);
+    const text = await shockAI(args, IDNum.substring(0, 20));
     sendmsg(truncate(text, 512, true));
   }
   if (!msg.a.startsWith(config.prefix)) return;
@@ -356,8 +384,6 @@ cl.on("hi", () => {
   const roomUrl = `https://multiplayerpiano.net/?c=${encodeURIComponent(
     roomID
   )}`;
-
-  console.log(roominfo);
   client.channels.get(config.bridgeid).sendMessage({
     content: `Logged in as \`${config.name}\` in [${roomID}](${roomUrl})`,
   });
