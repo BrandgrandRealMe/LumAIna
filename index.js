@@ -38,6 +38,7 @@ async function gemini(prompt) {
 }
 const shocktoken = process.env.shocktoken;
 async function shockAI(prompt, uid) {
+  console.log(`SHOCK: PROMPT - ${prompt}; UID - ${uid}; TOKEN - ${shocktoken}`);
   const response = await fetch(
     `http://api.shockbs.is-a.dev/chat?text=${prompt}&id=${uid}&botname=${config.name}`,
     {
